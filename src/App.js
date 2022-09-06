@@ -3,7 +3,8 @@ import "./App.css";
 import { useState, useEffect } from "react";
 import { BsTrash, BsBookmarkCheck, BsBookmarkCheckFill } from "react-icons/bs";
 
-const API = "http://localhost:4000";
+import loadingGif from "./img/loading.gif";
+import Task from "./components/Task";
 
 function App() {
   const [title, setTitle] = useState("");
@@ -11,26 +12,7 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // TODO on pageload
-
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-
-      const res = await fetch(API + "/todos")
-        .then((response) => response.json(0))
-        .then((data) => data)
-        .catch((err) => console.log(err));
-
-      setLoading(false);
-
-      setTodos(res);
-    };
-
-    loadData();
-  }, []);
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     const todo = {
@@ -40,52 +22,40 @@ function App() {
       done: false,
     };
 
-    await fetch(API + "/todos", {
-      method: "POST",
-      body: JSON.stringify(todo),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
     setTodos((prevState) => [...prevState, todo]);
 
     setTitle("");
     setTime("");
   };
 
-  const handleDelete = async (id) => {
-    await fetch(API + "/todos/" + id, {
-      method: "DELETE",
-    });
-
+  const handleDelete = (id) => {
     setTodos((prevState) => prevState.filter((todo) => todo.id !== id));
   };
 
-  const handleEdit = async (todo) => {
+  const handleEdit = (todo) => {
     todo.done = !todo.done;
 
-    const data = await fetch(API + "/todos/" + todo.id, {
-      method: "PUT",
-      body: JSON.stringify(todo),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    console.log(todo.done);
+
+    setTodos(todos);
 
     setTodos((prevState) =>
-      prevState.map((t) => (t.id === data.id ? (t = data) : t))
+      prevState.map((t) => (t.id === todo.id ? (t = todo) : t))
     );
   };
 
   if (loading) {
-    return <p>Carregando</p>;
+    return (
+      <p>
+        <img src={loadingGif} />
+      </p>
+    );
   }
 
   return (
     <div className="App">
       <div className="todo-header">
-        <h1>Todo</h1>
+        <h1>To Do List</h1>
       </div>
       <div className="todo-form">
         <h2>Insira a sua próxima tarefa:</h2>
@@ -119,16 +89,12 @@ function App() {
         <h2>Lista de tarefas:</h2>
         {todos.length === 0 && <p>Não há tarefas</p>}
         {todos.map((todo) => (
-          <div className="todo" key={todo.id}>
-            <h3 className={todo.done ? "todo-done" : ""}>{todo.title}</h3>
-            <p>Duração: {todo.time}</p>
-            <div className="actions">
-              <span onClick={() => handleEdit(todo)}>
-                {!todo.done ? <BsBookmarkCheck /> : <BsBookmarkCheckFill />}
-              </span>
-              <BsTrash onClick={() => handleDelete(todo.id)} />
-            </div>
-          </div>
+          <Task
+            key={todo.id}
+            handleDelete={handleDelete}
+            handleEdit={handleEdit}
+            todo={todo}
+          />
         ))}
       </div>
     </div>

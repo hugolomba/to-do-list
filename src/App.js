@@ -1,7 +1,6 @@
 import "./App.css";
 
-import { useState, useEffect } from "react";
-import { BsTrash, BsBookmarkCheck, BsBookmarkCheckFill } from "react-icons/bs";
+import { useState } from "react";
 
 import loadingGif from "./img/loading.gif";
 import Task from "./components/Task";
